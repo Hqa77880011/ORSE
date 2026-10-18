@@ -15,5 +15,6 @@
   "coverage": 0.9,
   "source_epochs": 30,
   "source_lr": 0.001,
-  "device": "cpu"
+  "device": "cpu",
+  "input_source": "angular_impact_resonance_vibration"
 }

@@ -48,12 +48,13 @@ Controls include uniform fusion, entropy weighting, margin-only weighting and re
 
 ## Registered compact reproduction setting
 
-Locally trained source CNNs with waveform adapters, fixed 1,024-sample windows, 30 source epochs and the registered five-scale physical orbit. The source trainer supplies weights; no externally pretrained model is necessary.
+Angular impact trains pass through damped source-dependent resonances with positive time-varying shaft speed. Source0/source1 share the same known fault vocabulary; a distinct unknown fault order occurs only in calibration/test bearings. The existing source CNN trainer and pool command produce genuine local source models.
 
-Run from the repository root after installation. The following commands use the registered setting; they are provided for execution and have not been run as part of the source review.
+Generate the declared input process, preprocess it, then use the existing method entry points:
 
 ```bash
-orse prepare --config configs/reproduce.json --input data/manifest.json --data data/reproduce
+python -m orse.synthetic --output data/generated --groups 30 --seed 17
+orse prepare --config configs/reproduce.json --input data/generated/manifest.json --data data/reproduce
 orse train-source --config configs/reproduce.json --data data/reproduce --source source0 --adapter waveform --length 1024 --output checkpoints/source0
 orse train-source --config configs/reproduce.json --data data/reproduce --source source1 --adapter waveform --length 1024 --output checkpoints/source1
 orse pool --config configs/reproduce.json --source-metadata checkpoints/source0/source.json checkpoints/source1/source.json --models models.json
@@ -61,9 +62,7 @@ orse calibrate --config configs/reproduce.json --data data/reproduce --models mo
 orse compare --config configs/reproduce.json --data data/reproduce --models models.json --calibration checkpoints/reproduce/calibration.json --output runs/reproduce
 ```
 
-`pool` assembles the two actually trained source metadata files and checks equal class counts; source0/source1 training records must use the same registered class order.
-
-Required external inputs: bearing/run-disjoint vibration with actual speed and sample rate, source/fault partitions. The formal input fields are specified above; preparation/training interfaces consume those fields directly. No particular paper dataset or pretrained task model is assumed beyond these declared inputs.
+`source.json` records the data-generating assumptions and seed. The configuration records `input_source`. All inputs for this selected setting are generated locally using installed package dependencies.
 
 ## Multiple seeds
 
