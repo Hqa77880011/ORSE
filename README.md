@@ -46,6 +46,25 @@ Controls include uniform fusion, entropy weighting, margin-only weighting and re
 
 `configs/default.json` specifies scale grid, order bins/tolerance, disagreement coefficient, softmax temperature, entropy weight, calibration coverage, source training and device. Source training writes final `source.ts`, adapter metadata and loss history. Evaluation writes original/report predictions, acceptance, rejection score and accepted orbit size. `metrics.json` includes open-set macro-F1, unknown AUROC/FPR95, known-decision AURC (unknowns count as errors), source-risk/error Spearman correlation and report coverage. `predictions.csv` permits threshold and source-pool analysis. Rates use [0,1]; comparison outputs and PNG/SVG plots are computed from run files. For controlled comparisons use one prespecified threshold, or calibrate each variant separately before comparing its operating coverage; `compare` uses the supplied shared calibration.
 
+## Registered compact reproduction setting
+
+Locally trained source CNNs with waveform adapters, fixed 1,024-sample windows, 30 source epochs and the registered five-scale physical orbit. The source trainer supplies weights; no externally pretrained model is necessary.
+
+Run from the repository root after installation. The following commands use the registered setting; they are provided for execution and have not been run as part of the source review.
+
+```bash
+orse prepare --config configs/reproduce.json --input data/manifest.json --data data/reproduce
+orse train-source --config configs/reproduce.json --data data/reproduce --source source0 --adapter waveform --length 1024 --output checkpoints/source0
+orse train-source --config configs/reproduce.json --data data/reproduce --source source1 --adapter waveform --length 1024 --output checkpoints/source1
+orse pool --config configs/reproduce.json --source-metadata checkpoints/source0/source.json checkpoints/source1/source.json --models models.json
+orse calibrate --config configs/reproduce.json --data data/reproduce --models models.json --output checkpoints/reproduce
+orse compare --config configs/reproduce.json --data data/reproduce --models models.json --calibration checkpoints/reproduce/calibration.json --output runs/reproduce
+```
+
+`pool` assembles the two actually trained source metadata files and checks equal class counts; source0/source1 training records must use the same registered class order.
+
+Required external inputs: bearing/run-disjoint vibration with actual speed and sample rate, source/fault partitions. The formal input fields are specified above; preparation/training interfaces consume those fields directly. No particular paper dataset or pretrained task model is assumed beyond these declared inputs.
+
 ## Multiple seeds
 
 Run matched configurations with different seeds in separate directories, then aggregate the generated metric files:

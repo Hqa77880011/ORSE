@@ -188,13 +188,14 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument(
         "command",
-        choices=["prepare", "train-source", "calibrate", "run", "compare", "plot"],
+        choices=["prepare", "train-source", "pool", "calibrate", "run", "compare", "plot"],
     )
     p.add_argument("--config", default="configs/default.json")
     p.add_argument("--input")
     p.add_argument("--data", default="data/vibration")
     p.add_argument("--output", default="runs")
     p.add_argument("--models", default="models.json")
+    p.add_argument("--source-metadata", nargs="+")
     p.add_argument("--calibration", default="checkpoints/calibration.json")
     p.add_argument("--source", default="source0")
     p.add_argument(
@@ -214,6 +215,21 @@ def main():
         prepare(a, c)
     elif a.command == "train-source":
         train(a, c)
+    elif a.command == "pool":
+        if not a.source_metadata or len(a.source_metadata) < 2:
+            p.error("pool requires at least two --source-metadata files with common class order")
+        entries = []
+        for filename in a.source_metadata:
+            metadata = Path(filename).resolve()
+            entry = load(metadata)
+            model_path = Path(entry["path"])
+            entry["path"] = str((metadata.parent / model_path).resolve())
+            if not Path(entry["path"]).is_file():
+                raise FileNotFoundError(entry["path"])
+            entries.append(entry)
+        if len({entry["classes"] for entry in entries}) != 1:
+            raise ValueError("Every source model must use the same known-class vocabulary")
+        save(a.models, entries)
     elif a.command == "calibrate":
         calibrate(a, c)
     elif a.command == "run":

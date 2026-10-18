@@ -1,0 +1,19 @@
+{
+  "seed": 17,
+  "scales": [
+    0.7,
+    0.85,
+    1.0,
+    1.2,
+    1.4
+  ],
+  "order_bins": 256,
+  "order_tolerance": 0.15,
+  "risk_weight": 1.0,
+  "temperature": 2.0,
+  "entropy_weight": 0.5,
+  "coverage": 0.9,
+  "source_epochs": 30,
+  "source_lr": 0.001,
+  "device": "cpu"
+}
